@@ -81,7 +81,9 @@ const getOrderItems = async (order_id) => {
         .orderBy("id")
 }
 
-const createOrderItems = async (items) => {
+const createOrderItems = async (order_id, items) => {
+    items.order_id = order_id
+
     now = moment().format();
     items.created_at = now;
     items.updated_at = now;

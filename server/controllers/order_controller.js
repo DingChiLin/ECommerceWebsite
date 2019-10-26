@@ -99,10 +99,8 @@ const createOrderItems = async (req, res) => {
         return;
     }
 
-    items.order_id = order_id
-
     try {
-        const order_item = await Order.createOrderItems(items);
+        const order_item = await Order.createOrderItems(order_id, items);
         res.status(201).json(order_item);
     } catch(e) {
         console.log(e);

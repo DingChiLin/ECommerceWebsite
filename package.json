@@ -1,0 +1,32 @@
+{
+  "name": "ecommercewebsite",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DingChiLin/ECommerceWebsite.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DingChiLin/ECommerceWebsite/issues"
+  },
+  "homepage": "https://github.com/DingChiLin/ECommerceWebsite#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "knex": "^0.19.5",
+    "moment": "^2.24.0",
+    "morgan": "^1.9.1",
+    "nodemon": "^1.19.4",
+    "pg": "^7.12.1",
+    "shortid": "^2.2.15"
+  }
+}

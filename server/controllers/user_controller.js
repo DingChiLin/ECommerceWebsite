@@ -26,7 +26,6 @@ const getUserOrders = async (req, res) => {
 
 
 const createUserOrder = async (req, res) => {
-    console.log("HI create order")
     if (!req || _.isEmpty(req.body) || _.isEmpty(req.params)) {
         return res.status(400).send('No data');
     }
@@ -56,7 +55,6 @@ const createUserOrder = async (req, res) => {
 
     try {
         const new_order = await User.createUserOrder(order, items)
-        console.log(new_order);
         res.location('api/v1/orders/' + new_order.order_id);
         res.status(201).json(new_order); 
     } catch (e) {

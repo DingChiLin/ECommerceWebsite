@@ -1,8 +1,10 @@
 require("dotenv").config();
 const _ = require('lodash');
 const express = require('express');
+const fs = require('fs');
 const moment = require('moment');
-
+const morgan = require('morgan');
+const path = require('path');
 const port = process.env.PORT || 8000;
 const pg = require('knex')({
     client: 'pg',
@@ -15,6 +17,9 @@ app.use(express.urlencoded({
     extended: true
 }));
 app.use(express.static('resources'));
+app.use(morgan('default'));
+
+console.log(__dirname)
 
 app.set('json spaces', 2);
 
