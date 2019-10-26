@@ -1,9 +1,5 @@
 const _ = require('lodash');
-const moment = require('moment');
-const pg = require('knex')({
-    client: 'pg',
-    connection: process.env.DATABASE_URL
-});
+const Order = require('../models/order_model');
 
 const getOrder = async (req, res) => {
     const order_id = parseInt(req.params.id);
@@ -12,25 +8,17 @@ const getOrder = async (req, res) => {
         return;
     }
 
-    const [order] = await pg('orders')
-        .select()
-        .where({
-            id: order_id
-        })
-        .catch(e => {
-            console.log(e);
-            return []
-        })
-    
-    if(!order) {
-        res.status(404).end("NOT FOUND");
-        return
+    try {
+        const order = await Order.getOrder(order_id);
+        if (!order) {
+            res.status(404).end("NOT FOUND");
+        } else {
+            res.status(200).json(order)
+        }
+    } catch (e) {
+        console.log(e);
+        res.status(500).end("Internal Error");
     }
-
-    order["link"] = [
-        { "rel":"items", "method":"get", "href":`/api/v1/orders/${order_id}/items` }
-    ];
-    res.status(200).json(order)
 };
 
 const updateOrder = async (req, res) => {
@@ -47,59 +35,25 @@ const updateOrder = async (req, res) => {
 
     status = parseInt(req.body.status);
     description = req.body.description;
-
-    now = moment().format();
+    update = {
+        status: isNaN(status) ? undefined : status,
+        description: description,
+    }
 
     items = req.body.items;
 
-    pg.transaction(async (trx) => {
-        const [new_order] = await pg('orders')
-            .where({id: order_id})
-            .update({
-                status: isNaN(status) ? undefined : status,
-                description: description,
-                updated_at: now
-            })
-            .returning('*')
-            .catch(e => {
-                console.log(e);
-                return [];
-            });
-        
-        if (items) {
-            await trx('order_items')
-                .where({order_id})
-                .delete();
-
-            const order_items = items.map(obj => {
-                obj.order_id = order_id
-                obj.created_at = now;
-                obj.updated_at = now;
-                return obj;
-            });
-
-            await trx('order_items')
-                .insert(order_items);
-        }
-        
-        new_order["link"] = [
-            { "rel":"items", "method":"get", "href":`/api/v1/orders/${order_id}/items` }
-        ];
-
-        res.location('api/v1/orders/' + order_id);
-        return new_order
-    })
-    .then(new_order => {
+    try {
+        const new_order = await Order.updateOrder(order_id, update, items);
+        res.location('api/v1/orders/' + new_order.order_id);
         res.status(200).json(new_order);
-    })
-    .catch(e => {
+    } catch(e) {
         console.log(e);
         res.status(400).end("Input data is wrong"); 
         return;
-    });
+    };
 };
 
-const deleteOrder = (req, res) => {
+const deleteOrder = async (req, res) => {
     order_id = parseInt(req.params.id);
 
     if (!order_id) {
@@ -107,17 +61,14 @@ const deleteOrder = (req, res) => {
         return;
     }
 
-    pg('orders')
-        .where({id: order_id})
-        .delete()
-        .then(() => {
-            res.status(204).end(""); 
-        })
-        .catch(e => {
-            console.log(e);
-            res.status(400).end("Input data is wrong"); 
-            return;
-        })
+    try {
+        await Order.deleteOrder(order_id);
+        res.status(204).end(""); 
+    } catch(e){
+        console.log(e);
+        res.status(400).end("Input data is wrong"); 
+        return;
+    }
 };
 
 const getOrderItems = async (req, res) => {
@@ -126,19 +77,13 @@ const getOrderItems = async (req, res) => {
         res.status(400).end("Input data is wrong");
         return;
     }    
-
-   const order_items = await pg('order_items')
-        .select()
-        .where({
-            order_id
-        })
-        .orderBy("id")
-        .catch(e => {
-            console.log(e);
-            return []
-        })
-    
-    res.status(200).json(order_items);
+    try {
+        const order_items = await Order.getOrderItems(order_id);
+        res.status(200).json(order_items);
+    } catch(e) {
+        console.log(e);
+        res.status(500).end("Internal Error");
+    }
 };
 
 const createOrderItems = async (req, res) => {
@@ -154,23 +99,16 @@ const createOrderItems = async (req, res) => {
         return;
     }
 
-    now = moment().format();
     items.order_id = order_id
-    items.created_at = now;
-    items.updated_at = now;
 
-    const order_item = await pg('order_items')
-        .insert(items)
-        .returning('*')
-        .catch(e => {
-            console.log(e);
-            res.status(400).end("Input data is wrong"); 
-            return;
-        });
-    
-    if(order_item) {
+    try {
+        const order_item = await Order.createOrderItems(items);
         res.status(201).json(order_item);
-    }
+    } catch(e) {
+        console.log(e);
+        res.status(400).end("Input data is wrong"); 
+        return;
+    };
 };
 
 module.exports = {

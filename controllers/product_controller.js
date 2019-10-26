@@ -1,40 +1,31 @@
-const pg = require('knex')({
-    client: 'pg',
-    connection: process.env.DATABASE_URL
-});
+const Product = require('../models/product_model')
 
-const getProducts = (req, res) => {
-    pg('products')
-        .select(["id", "name", "price", "small_image_url"])
-        .then((products) => {
-            res.status(200).json(products)
-        })
-        .catch(e => {
-            console.log(e);
-            res.status(404).end("NOT FOUND");
-            return
-        })
+const getProducts = async (req, res) => {
+    try {
+        const products = await Product.getProducts()
+        res.status(200).json(products)
+    } catch(e) {
+        console.log(e);
+        res.status(404).end("NOT FOUND");
+        return
+    }
 };
 
-const getProduct = (req, res) => {
+const getProduct = async (req, res) => {
     product_id = parseInt(req.params.id);
     if (!product_id) {
         res.status(400).end("id should be integer");
         return;
     }
-    pg('products')
-        .select(["id", "name", "price", "description", "image_url"])
-        .where({
-            id: product_id
-        })
-        .then((product) => {
-            res.status(200).json(product);
-        })
-        .catch(e => {
-            console.log(e);
-            res.status(404).end("NOT FOUND");
-            return;
-        });
+
+    try {
+        const product = await Product.getProduct(product_id);
+        res.status(200).json(product);
+    } catch (e) {
+        console.log(e);
+        res.status(404).end("NOT FOUND");
+        return;
+    };
 };
 
 module.exports = {
