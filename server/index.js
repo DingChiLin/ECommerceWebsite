@@ -1,45 +1,88 @@
 require("dotenv").config();
-const _ = require('lodash');
-const cors = require('cors');
+const bcrypt = require('bcrypt-nodejs');
 const express = require('express');
-const fs = require('fs');
-const moment = require('moment');
+const LocalStrategy = require('passport-local').Strategy;
 const morgan = require('morgan');
-const path = require('path');
-const port = process.env.PORT || 8000;
+const passport = require('passport');
 const pg = require('knex')({
     client: 'pg',
     connection: process.env.DATABASE_URL
 });
+const port = process.env.PORT || 8000;
+const session = require('express-session');
+const uuid = require('uuid/v4');
+
+passport.use(new LocalStrategy(
+    { usernameField: 'email' },
+    async (email, password, done) => {
+        const [user] = await pg("users").where({email});
+        if (!user) {
+            return done(null, false, { message: 'Invalid credentials' });
+        }
+        if (!bcrypt.compareSync(password, user.password)) {
+            return done(null, false, { message: 'Invalid credentials' });
+        } else {
+            return done(null, user);
+        }
+    }
+));
+
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+    const [user] = await pg("users").where({id});
+    done(null, user);
+});
 
 const app = express();
-app.use(cors());
+app.set('json spaces', 2);
+
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.urlencoded({
-    extended: true
-}));
 app.use(express.static('resources'));
 app.use(morgan());
 
-console.log(__dirname)
-
-app.set('json spaces', 2);
-
-app.listen(port, () => {
-    console.log(`Listening on port ${port}...`);
-});
-
-// TODO
-// 1. use route, controller and model
-// 2. use logger
-
-// app.get('/',(req, res) => {
-//     res.send('Hello World!!! YOYO');
-// });
-
+const FileStore = require('session-file-store')(session);
+app.use(session({
+    genid: (req) => {
+        return uuid();
+    },
+    store: new FileStore(),
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: true
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 app.use('/api/v1', [
     require('./routes/product_routes'),
     require('./routes/user_routes'),
     require('./routes/order_routes'),
     require('./routes/item_routes')
-])
+]);
+
+app.get('/', (req, res) => {
+    res.send(`Home page!`);
+})
+
+app.get('/api/v1/login', (req, res) => {
+    res.send(`Login page!`);
+})
+
+app.post('/api/v1/login', (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if(info) {return res.send(info.message)}
+        if (err) { return next(err); }
+        if (!user) { return res.redirect('/login'); }
+        req.login(user, (err) => {
+            if (err) { return next(err); }
+            return res.send("Login Succeeded!")
+        })
+    })(req, res, next);
+})
+
+app.listen(port, () => {
+    console.log(`Listening on port ${port}...`);
+});

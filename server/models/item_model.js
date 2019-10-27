@@ -4,10 +4,19 @@ const pg = require('knex')({
     connection: process.env.DATABASE_URL
 });
 
+const getItemUserId = async (item_id) => {
+    const [item] = await pg('order_items')
+        .select('orders.user_id')
+        .innerJoin('orders', 'order_items.order_id', 'orders.id')
+        .where('order_items.id', item_id);
+    if (!item){ return };
+    return item.user_id;
+}
+
 const getItem = async (item_id) => {
     const [item] = await pg('order_items')
-        .where({id: item_id})
-    return item
+        .where({id: item_id});
+    return item;
 }
 
 const updateItem = async (item_id, update) => {
@@ -17,19 +26,20 @@ const updateItem = async (item_id, update) => {
     const item = await pg('order_items')
         .where({id: item_id})
         .update(update)
-        .returning('*')
+        .returning('*');
 
-    return item
+    return item;
 }
 
 const deleteItem = async (item_id) => {
     await pg('order_items')
         .where({id: item_id})
-        .delete()
-    return
+        .delete();
+    return;
 }
 
 module.exports = {
+    getItemUserId,
     getItem,
     updateItem,
     deleteItem

@@ -1,6 +1,5 @@
 const _ = require('lodash');
 const moment = require('moment');
-const shortid = require('shortid');
 const pg = require('knex')({
     client: 'pg',
     connection: process.env.DATABASE_URL
@@ -16,7 +15,7 @@ const getUserOrders = async (user_id) => {
         .catch(e => {
             console.log(e);
             return []
-        })
+        });
 
     orders_with_items_link = orders.map(order => {
         order["link"] = [
@@ -25,7 +24,7 @@ const getUserOrders = async (user_id) => {
         return order;
     })
 
-    return orders_with_items_link
+    return orders_with_items_link;
 }
 
 const createUserOrder = async (order, items) => {
@@ -53,16 +52,16 @@ const createUserOrder = async (order, items) => {
             { "rel":"items", "method":"get", "href":`/api/v1/orders/${new_order.id}/items` }
         ];
 
-        return new_order
+        return new_order;
     })
 }
 
 const deleteUserOrders = async (user_id) => {
     await pg('orders')
         .where({user_id})
-        .delete()
+        .delete();
 
-    return
+    return;
 }
 
 module.exports = {

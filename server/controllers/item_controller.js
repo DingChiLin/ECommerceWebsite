@@ -1,14 +1,44 @@
 const Item = require('../models/item_model');
 
-const getItem = async (req, res) => {
+const authenticate = async (req, item_id) => {
     item_id = parseInt(req.params.id);
-    if (!item_id) {
-        res.status(400).end("Input data is wrong");
+    status_code = 200;
+    message = "";
+
+    if (!req.isAuthenticated()) {
+        status_code = 401;
+        message = "Not logged-in";
+    } else if (!item_id) {
+        status_code = 400;
+        message = "item_id is wrong";  
+    } else {
+        const user_id = await Item.getItemUserId(item_id);
+        if (!user_id) {
+            status_code = 400;
+            message = "item_id is wrong";
+        } else if (user_id != req.user.id) {
+            status_code = 403;
+            message = "Not allowed";
+        }
+    }
+
+    return {
+        item_id,
+        status_code,
+        message, 
+    }
+}
+
+
+const getItem = async (req, res) => {
+    const {item_id, status_code, message} = await authenticate(req)
+    if (status_code != 200) {
+        res.status(status_code).json(message);
         return;
     }
 
     try {
-        const item = Item.getItem(item_id);
+        const item = await Item.getItem(item_id);
         res.status(200).json(item);
     } catch(e) {
         console.log(e);
@@ -18,9 +48,9 @@ const getItem = async (req, res) => {
 }
 
 const updateItem = async (req, res) => {
-    const item_id = parseInt(req.params.id);
-    if (!item_id) {
-        res.status(400).end("Input data is wrong");
+    const {item_id, status_code, message} = await authenticate(req)
+    if (status_code != 200) {
+        res.status(status_code).json(message);
         return;
     }
 
@@ -41,9 +71,9 @@ const updateItem = async (req, res) => {
 };
 
 const deleteItem = async (req, res) => {
-    item_id = parseInt(req.params.id);
-    if (!item_id) {
-        res.status(400).end("Input data is wrong");
+    const {item_id, status_code, message} = await authenticate(req)
+    if (status_code != 200) {
+        res.status(status_code).json(message);
         return;
     }
 

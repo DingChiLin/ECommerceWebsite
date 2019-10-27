@@ -8,10 +8,33 @@ const ORDER_STATUS = {
     "FAILED": 2
 }
 
+const authenticate = async (req) => {
+    user_id = parseInt(req.params.id);
+    status_code = 200;
+    message = "";
+
+    if (!req.isAuthenticated()) {
+        status_code = 401;
+        message = "Not logged-in";
+    } else if (!user_id) {
+        status_code = 400;
+        message = "user_id is wrong";
+    } else if (user_id != req.user.id) {
+        status_code = 403;
+        message = "Not allowed";
+    }
+
+    return {
+        user_id,
+        status_code,
+        message, 
+    }
+}
+
 const getUserOrders = async (req, res) => {
-    const user_id = parseInt(req.params.id);
-    if (!user_id) {
-        res.status(400).end("user_id is wrong");
+    const {user_id, status_code, message} = await authenticate(req);
+    if (status_code != 200){
+        res.status(status_code).json(message);
         return;
     }
 
@@ -26,24 +49,24 @@ const getUserOrders = async (req, res) => {
 
 
 const createUserOrder = async (req, res) => {
+    const {user_id, status_code, message} = await authenticate(req);
+    if (status_code != 200){
+        res.status(status_code).json(message);
+        return;
+    }
+
     if (!req || _.isEmpty(req.body) || _.isEmpty(req.params)) {
         return res.status(400).send('No data');
     }
 
-    const user_id = parseInt(req.params.id);
-    if (!user_id) {
-        res.status(400).end("Input data is wrong");
-        return;
-    }
-
-    const items = req.body.items
+    const items = req.body.items;
     if (!items || _.isEmpty(items)) {
         res.status(400).end("Input data is wrong");
         return;
     }
 
     const status = parseInt(req.body.status);
-    const description = String(req.body.description, "");
+    const description = String(req.body.description || "");
 
     const order_number = shortid.generate();
     const order = {
@@ -54,7 +77,7 @@ const createUserOrder = async (req, res) => {
     };
 
     try {
-        const new_order = await User.createUserOrder(order, items)
+        const new_order = await User.createUserOrder(order, items);
         res.location('api/v1/orders/' + new_order.order_id);
         res.status(201).json(new_order); 
     } catch (e) {
@@ -65,10 +88,9 @@ const createUserOrder = async (req, res) => {
 };
 
 const deleteUserOrders = async (req, res) => {
-    user_id = parseInt(req.params.id);
-
-    if (!user_id) {
-        res.status(400).end("Input data is wrong");
+    const {user_id, status_code, message} = await authenticate(req);
+    if (status_code != 200){
+        res.status(status_code).json(message);
         return;
     }
 

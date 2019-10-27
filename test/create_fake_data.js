@@ -42,33 +42,24 @@ raw_users = [
     {
         "name": "user1",
         "email": "user1@gmail.com",
+        "password": "$2a$10$SCxYN7Je2pwVM7DcOippiObQ2nzUdjQCm3r2DiMAiEfyQU70SHcQu", //"user1password",
+        "confirmed": true,
     },
     {
         "name": "user2",
         "email": "user2@gmail.com",
+        "password": "$2a$10$hTO0NM4n4F1y5DKbl1C2s.JuBGommoQCA1nJlPu6QXCZ5loNLRjhu", //"user2password",
+        "confirmed": true,
     },
     {
         "name": "user3",
         "email": "user3@gmail.com",
+        "password": "$2a$10$6cz.Gvd4nP/CD0fXfdQ0/.Pkq7UDsOgYzRZoOVU4z4Zr/yd70sqV.", //"user3password",
+        "confirmed": true,
     },
 ]
 
-// const request = require('request')
-// 
-// function createProducts(){
-//     return new Promise((resolve, reject) => {
-//         request.post(`http://localhost:${port}/api/v1/products`, {
-//             json: products
-//         }, (error, res, body) => {
-//             if (error) {
-//                 reject(error)
-//             }
-//             resolve(body)
-//         })
-//     })
-// }
-
-now = moment().format(); // Can mock this for unit test
+now = moment().format();
 const products = raw_products.map(obj => {
     obj.created_at = now;
     obj.updated_at = now;

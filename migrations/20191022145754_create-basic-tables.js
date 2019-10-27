@@ -5,8 +5,11 @@ exports.up = function(knex) {
             table.increments('id').primary();
             table.string('name').notNullable();
             table.string('email').notNullable();
+            table.string('password').notNullable();
+            table.boolean('confirmed');
             table.timestamp('created_at').notNullable();
             table.timestamp('updated_at').notNullable();
+            table.index("email");
         })
         .createTable('products', function (table) {
             table.increments('id');

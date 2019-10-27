@@ -1,4 +1,4 @@
-const router = require('express').Router()
+const router = require('express').Router();
 
 const {
     getOrder,
@@ -6,15 +6,15 @@ const {
     deleteOrder,
     getOrderItems,
     createOrderItems
-} = require('../controllers/order_controller')
+} = require('../controllers/order_controller');
 
 router.route('/orders/:id')
     .get(getOrder)
     .patch(updateOrder)
-    .delete(deleteOrder)
+    .delete(deleteOrder);
 
 router.route('/orders/:id/items')
     .get(getOrderItems)
-    .post(createOrderItems)
+    .post(createOrderItems);
 
-module.exports = router
+module.exports = router;

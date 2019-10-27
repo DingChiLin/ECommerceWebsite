@@ -5,6 +5,14 @@ const pg = require('knex')({
     connection: process.env.DATABASE_URL
 });
 
+const getOrderUserId = async (order_id) => {
+    const [order] = await pg("orders")
+        .select("user_id")
+        .where({id: order_id});
+    if (!order){ return };
+    return order.user_id;
+}
+
 const getOrder = async (order_id) => {
     const [order] = await pg('orders')
         .select()
@@ -13,11 +21,11 @@ const getOrder = async (order_id) => {
         })
         .catch(e => {
             console.log(e);
-            return []
-        })
+            return [];
+        });
     
     if(!order) {
-        return null
+        return null;
     }
 
     order["link"] = [
@@ -61,7 +69,7 @@ const updateOrder = async (order_id, update, items) => {
             { "rel":"items", "method":"get", "href":`/api/v1/orders/${order_id}/items` }
         ];
 
-        return new_order
+        return new_order;
     })
 
 }
@@ -69,7 +77,7 @@ const updateOrder = async (order_id, update, items) => {
 const deleteOrder = async (order_id) => {
     return pg('orders')
         .where({id: order_id})
-        .delete()
+        .delete();
 }
 
 const getOrderItems = async (order_id) => {
@@ -78,22 +86,25 @@ const getOrderItems = async (order_id) => {
         .where({
             order_id
         })
-        .orderBy("id")
+        .orderBy("id");
 }
 
 const createOrderItems = async (order_id, items) => {
-    items.order_id = order_id
-
     now = moment().format();
-    items.created_at = now;
-    items.updated_at = now;
-    return pg('order_items')
-        .insert(items)
-        .returning('*')
+    order_items = items.map(item => {
+        item.order_id = order_id;
+        item.created_at = now;
+        item.updated_at = now;
+        return item;
+    });
 
+    return pg('order_items')
+        .insert(order_items)
+        .returning('*');
 }
 
 module.exports = {
+    getOrderUserId,
     getOrder,
     updateOrder,
     deleteOrder,

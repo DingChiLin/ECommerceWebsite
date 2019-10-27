@@ -1,10 +1,39 @@
 const _ = require('lodash');
 const Order = require('../models/order_model');
 
+const authenticate = async (req) => {
+    order_id = parseInt(req.params.id);
+    status_code = 200;
+    message = "";
+
+    if (!req.isAuthenticated()) {
+        status_code = 401;
+        message = "Not logged-in";
+    } else if (!order_id) {
+        status_code = 400;
+        message = "order_id is wrong";
+    } else {
+        const user_id = await Order.getOrderUserId(order_id);
+        if (!user_id) {
+            status_code = 400;
+            message = "order_id is wrong";
+        } else if (user_id != req.user.id) {
+            status_code = 403;
+            message = "Not allowed";
+        }
+    }
+
+    return {
+        order_id,
+        status_code,
+        message, 
+    }
+}
+
 const getOrder = async (req, res) => {
-    const order_id = parseInt(req.params.id);
-    if (!order_id) {
-        res.status(400).end("Input data is wrong");
+    const {order_id, status_code, message} = await authenticate(req);
+    if (status_code != 200){
+        res.status(status_code).json(message);
         return;
     }
 
@@ -13,7 +42,7 @@ const getOrder = async (req, res) => {
         if (!order) {
             res.status(404).end("NOT FOUND");
         } else {
-            res.status(200).json(order)
+            res.status(200).json(order);
         }
     } catch (e) {
         console.log(e);
@@ -22,15 +51,14 @@ const getOrder = async (req, res) => {
 };
 
 const updateOrder = async (req, res) => {
-    if (!req || _.isEmpty(req.body)) {
-        return res.status(400).send('No data');
+    const {order_id, status_code, message} = await authenticate(req);
+    if (status_code != 200){
+        res.status(status_code).json(message);
+        return;
     }
 
-    order_id = parseInt(req.params.id);
-
-    if (!order_id) {
-        res.status(400).end("Input data is wrong");
-        return;
+    if (!req || _.isEmpty(req.body)) {
+        return res.status(400).send('No data');
     }
 
     status = parseInt(req.body.status);
@@ -54,10 +82,9 @@ const updateOrder = async (req, res) => {
 };
 
 const deleteOrder = async (req, res) => {
-    order_id = parseInt(req.params.id);
-
-    if (!order_id) {
-        res.status(400).end("Input data is wrong");
+    const {order_id, status_code, message} = await authenticate(req);
+    if (status_code != 200){
+        res.status(status_code).json(message);
         return;
     }
 
@@ -72,11 +99,12 @@ const deleteOrder = async (req, res) => {
 };
 
 const getOrderItems = async (req, res) => {
-    const order_id = parseInt(req.params.id);
-    if (!order_id) {
-        res.status(400).end("Input data is wrong");
+    const {order_id, status_code, message} = await authenticate(req);
+    if (status_code != 200){
+        res.status(status_code).json(message);
         return;
-    }    
+    }
+
     try {
         const order_items = await Order.getOrderItems(order_id);
         res.status(200).json(order_items);
@@ -87,13 +115,13 @@ const getOrderItems = async (req, res) => {
 };
 
 const createOrderItems = async (req, res) => {
-    const order_id = parseInt(req.params.id);
-    if (!order_id) {
-        res.status(400).end("Input data is wrong");
+    const {order_id, status_code, message} = await authenticate(req);
+    if (status_code != 200){
+        res.status(status_code).json(message);
         return;
     }
 
-    const items = req.body
+    const items = req.body;
     if (!items) {
         res.status(400).end("Input data is wrong");
         return;

@@ -8,12 +8,12 @@ const getProduct = async (product_id) => {
         .select(["id", "name", "price", "description", "image_url"])
         .where({
             id: product_id
-        })
+        });
 }
 
 const getProducts = async () => {
     return pg('products')
-        .select(["id", "name", "price", "small_image_url"])
+        .select(["id", "name", "price", "small_image_url"]);
 }
 
 module.exports = {
