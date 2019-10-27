@@ -27,7 +27,7 @@ exports.up = function(knex) {
             table.string('description');
             table.timestamp('created_at').notNullable();
             table.timestamp('updated_at').notNullable();
-            table.index(['user_id', 'order_number'], "user_order_number");
+            table.index('user_id');
         })
         .createTable('order_items', function(table) {
             table.increments('id').primary();

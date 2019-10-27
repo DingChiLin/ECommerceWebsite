@@ -1,5 +1,6 @@
 require("dotenv").config();
 const _ = require('lodash');
+const cors = require('cors');
 const express = require('express');
 const fs = require('fs');
 const moment = require('moment');
@@ -12,12 +13,13 @@ const pg = require('knex')({
 });
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({
     extended: true
 }));
 app.use(express.static('resources'));
-app.use(morgan('default'));
+app.use(morgan());
 
 console.log(__dirname)
 
