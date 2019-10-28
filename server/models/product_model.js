@@ -11,9 +11,15 @@ const getProduct = async (product_id) => {
         });
 };
 
-const getProducts = async () => {
-    return pg('products')
-        .select(['id', 'name', 'price', 'small_image_url']);
+const getProducts = async (ids) => {
+	if (ids){
+		return pg('products')
+			.whereIn('id', ids)
+			.select(['id', 'name', 'price', 'small_image_url']);
+	} else {
+	    return pg('products')
+			.select(['id', 'name', 'price', 'small_image_url']);
+	}
 };
 
 module.exports = {

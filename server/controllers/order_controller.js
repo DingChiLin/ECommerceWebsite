@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const Order = require('../models/order_model');
+const Product = require('../models/product_model');
 
 const authenticate = async (req) => {
     let order_id = parseInt(req.params.id);
@@ -107,6 +108,14 @@ const getOrderItems = async (req, res) => {
 
     try {
         const order_items = await Order.getOrderItems(order_id);
+        const product_ids = _.uniq(order_items.map(item => item.product_id));
+        const products = await Product.getProducts(product_ids);
+        const products_map = _.groupBy(products, prod => prod.id);
+
+        order_items.map(item => {
+            item.product = products_map[item.product_id];
+        });
+
         res.status(200).json(order_items);
     } catch(e) {
         console.log(e);
