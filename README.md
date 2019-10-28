@@ -1,3 +1,7 @@
+### Environment
+- node v12.13.0
+- npm 6.12.0
+
 ### How to run
 
 1. Install and start postgresql server
