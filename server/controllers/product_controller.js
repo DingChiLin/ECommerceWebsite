@@ -1,19 +1,19 @@
 const Product = require('../models/product_model');
 
 const authenticate = async (req) => {
-    status_code = 200;
-    message = "";
+    let status_code = 200;
+    let message = '';
 
     if (!req.isAuthenticated()) {
         status_code = 401;
-        message = "Not logged-in";
+        message = 'Not logged-in';
     }
 
     return {
         status_code,
-        message, 
-    }
-}
+        message,
+    };
+};
 
 const getProducts = async (req, res) => {
     const {status_code, message} = await authenticate(req);
@@ -27,7 +27,7 @@ const getProducts = async (req, res) => {
         res.status(200).json(products);
     } catch(e) {
         console.log(e);
-        res.status(404).end("NOT FOUND");
+        res.status(404).end('NOT FOUND');
         return;
     }
 };
@@ -39,9 +39,9 @@ const getProduct = async (req, res) => {
         return;
     }
 
-    product_id = parseInt(req.params.id);
+    const product_id = parseInt(req.params.id);
     if (!product_id) {
-        res.status(400).end("id should be integer");
+        res.status(400).end('id should be integer');
         return;
     }
 
@@ -50,12 +50,12 @@ const getProduct = async (req, res) => {
         res.status(200).json(product);
     } catch (e) {
         console.log(e);
-        res.status(404).end("NOT FOUND");
+        res.status(404).end('NOT FOUND');
         return;
-    };
+    }
 };
 
 module.exports = {
     getProducts,
     getProduct
-}
+};

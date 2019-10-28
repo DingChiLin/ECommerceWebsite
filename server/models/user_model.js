@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const moment = require('moment');
 const pg = require('knex')({
     client: 'pg',
@@ -11,24 +10,24 @@ const getUserOrders = async (user_id) => {
         .where({
             user_id: user_id
         })
-        .orderBy("id")
+        .orderBy('id')
         .catch(e => {
             console.log(e);
-            return []
+            return [];
         });
 
-    orders_with_items_link = orders.map(order => {
-        order["link"] = [
-            { "rel":"items", "method":"get", "href":`/api/v1/orders/${order.id}/items` }
+    const orders_with_items_link = orders.map(order => {
+        order['link'] = [
+            { 'rel':'items', 'method':'get', 'href':`/api/v1/orders/${order.id}/items` }
         ];
         return order;
-    })
+    });
 
     return orders_with_items_link;
-}
+};
 
 const createUserOrder = async (order, items) => {
-    now = moment().format();
+    const now = moment().format();
     order.created_at = now;
     order.updated_at = now;
 
@@ -39,7 +38,7 @@ const createUserOrder = async (order, items) => {
 
         if (items) {
             const order_items = items.map(obj => {
-                obj.order_id = new_order.id
+                obj.order_id = new_order.id;
                 obj.created_at = now;
                 obj.updated_at = now;
                 return obj;
@@ -48,13 +47,13 @@ const createUserOrder = async (order, items) => {
             await trx('order_items')
                 .insert(order_items);
         }
-        new_order["link"] = [
-            { "rel":"items", "method":"get", "href":`/api/v1/orders/${new_order.id}/items` }
+        new_order['link'] = [
+            { 'rel':'items', 'method':'get', 'href':`/api/v1/orders/${new_order.id}/items` }
         ];
 
         return new_order;
-    })
-}
+    });
+};
 
 const deleteUserOrders = async (user_id) => {
     await pg('orders')
@@ -62,10 +61,10 @@ const deleteUserOrders = async (user_id) => {
         .delete();
 
     return;
-}
+};
 
 module.exports = {
     getUserOrders,
     createUserOrder,
     deleteUserOrders
-}
+};

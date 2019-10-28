@@ -1,4 +1,4 @@
-require("dotenv").config();
+require('dotenv').config();
 const bcrypt = require('bcrypt-nodejs');
 const express = require('express');
 const LocalStrategy = require('passport-local').Strategy;
@@ -15,7 +15,7 @@ const uuid = require('uuid/v4');
 passport.use(new LocalStrategy(
     { usernameField: 'email' },
     async (email, password, done) => {
-        const [user] = await pg("users").where({email});
+        const [user] = await pg('users').where({email});
         if (!user) {
             return done(null, false, { message: 'Invalid credentials' });
         }
@@ -32,7 +32,7 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(async (id, done) => {
-    const [user] = await pg("users").where({id});
+    const [user] = await pg('users').where({id});
     done(null, user);
 });
 
@@ -46,7 +46,7 @@ app.use(morgan());
 
 const FileStore = require('session-file-store')(session);
 app.use(session({
-    genid: (req) => {
+    genid: () => {
         return uuid();
     },
     store: new FileStore(),
@@ -64,24 +64,24 @@ app.use('/api/v1', [
 ]);
 
 app.get('/', (req, res) => {
-    res.send(`Home page!`);
-})
+    res.send('Home page!');
+});
 
 app.get('/api/v1/login', (req, res) => {
-    res.send(`Login page!`);
-})
+    res.send('Login page!');
+});
 
 app.post('/api/v1/login', (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
-        if(info) {return res.send(info.message)}
+        if(info) {return res.send(info.message);}
         if (err) { return next(err); }
         if (!user) { return res.redirect('/login'); }
         req.login(user, (err) => {
             if (err) { return next(err); }
-            return res.send("Login Succeeded!")
-        })
+            return res.send('Login Succeeded!');
+        });
     })(req, res, next);
-})
+});
 
 app.listen(port, () => {
     console.log(`Listening on port ${port}...`);

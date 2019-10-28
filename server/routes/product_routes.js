@@ -1,8 +1,8 @@
 const router = require('express').Router();
 
 const {
-  getProducts,
-  getProduct,
+    getProducts,
+    getProduct,
 } = require('../controllers/product_controller');
 
 router.route('/products')

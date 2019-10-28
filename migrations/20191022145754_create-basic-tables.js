@@ -9,7 +9,7 @@ exports.up = function(knex) {
             table.boolean('confirmed');
             table.timestamp('created_at').notNullable();
             table.timestamp('updated_at').notNullable();
-            table.index("email");
+            table.index('email');
         })
         .createTable('products', function (table) {
             table.increments('id');
@@ -20,7 +20,7 @@ exports.up = function(knex) {
             table.string('small_image_url');
             table.timestamp('created_at').notNullable();
             table.timestamp('updated_at').notNullable();
-            table.index("name")
+            table.index('name');
         })
         .createTable('orders', function(table) {
             table.increments('id').primary();
@@ -41,13 +41,13 @@ exports.up = function(knex) {
             table.timestamp('updated_at').notNullable();
             table.index('order_id');
             table.index('product_id');
-        })
+        });
 };
-    
+
 exports.down = function(knex) {
     return knex.schema
-        .dropTable("order_items")
-        .dropTable("orders")
-        .dropTable("products")
-        .dropTable("users")
+        .dropTable('order_items')
+        .dropTable('orders')
+        .dropTable('products')
+        .dropTable('users');
 };

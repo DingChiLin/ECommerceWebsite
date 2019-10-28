@@ -1,37 +1,37 @@
 const Item = require('../models/item_model');
 
-const authenticate = async (req, item_id) => {
-    item_id = parseInt(req.params.id);
-    status_code = 200;
-    message = "";
+const authenticate = async (req) => {
+    let item_id = parseInt(req.params.id);
+    let status_code = 200;
+    let message = '';
 
     if (!req.isAuthenticated()) {
         status_code = 401;
-        message = "Not logged-in";
+        message = 'Not logged-in';
     } else if (!item_id) {
         status_code = 400;
-        message = "item_id is wrong";  
+        message = 'item_id is wrong';
     } else {
         const user_id = await Item.getItemUserId(item_id);
         if (!user_id) {
             status_code = 400;
-            message = "item_id is wrong";
+            message = 'item_id is wrong';
         } else if (user_id != req.user.id) {
             status_code = 403;
-            message = "Not allowed";
+            message = 'Not allowed';
         }
     }
 
     return {
         item_id,
         status_code,
-        message, 
-    }
-}
+        message,
+    };
+};
 
 
 const getItem = async (req, res) => {
-    const {item_id, status_code, message} = await authenticate(req)
+    const {item_id, status_code, message} = await authenticate(req);
     if (status_code != 200) {
         res.status(status_code).json(message);
         return;
@@ -42,13 +42,13 @@ const getItem = async (req, res) => {
         res.status(200).json(item);
     } catch(e) {
         console.log(e);
-        res.status(400).end("Input data is wrong");
+        res.status(400).end('Input data is wrong');
         return;
-    };
-}
+    }
+};
 
 const updateItem = async (req, res) => {
-    const {item_id, status_code, message} = await authenticate(req)
+    const {item_id, status_code, message} = await authenticate(req);
     if (status_code != 200) {
         res.status(status_code).json(message);
         return;
@@ -56,7 +56,7 @@ const updateItem = async (req, res) => {
 
     const update = req.body;
     if (!update) {
-        res.status(400).end("Input data is wrong");
+        res.status(400).end('Input data is wrong');
         return;
     }
 
@@ -65,13 +65,13 @@ const updateItem = async (req, res) => {
         res.status(200).json(new_item);
     } catch(e) {
         console.log(e);
-        res.status(400).end("Input data is wrong"); 
+        res.status(400).end('Input data is wrong');
         return;
-    };
+    }
 };
 
 const deleteItem = async (req, res) => {
-    const {item_id, status_code, message} = await authenticate(req)
+    const {item_id, status_code, message} = await authenticate(req);
     if (status_code != 200) {
         res.status(status_code).json(message);
         return;
@@ -79,10 +79,10 @@ const deleteItem = async (req, res) => {
 
     try {
         await Item.deleteItem(item_id);
-        res.status(204).end(""); 
-    } catch {
+        res.status(204).end('');
+    } catch(e) {
         console.log(e);
-        res.status(400).end("Input data is wrong"); 
+        res.status(400).end('Input data is wrong');
         return;
     }
 };
@@ -91,4 +91,4 @@ module.exports = {
     getItem,
     updateItem,
     deleteItem,
-}
+};

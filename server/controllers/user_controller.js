@@ -3,37 +3,37 @@ const User = require('../models/user_model');
 const shortid = require('shortid');
 
 const ORDER_STATUS = {
-    "SUCCEEDED": 0,
-    "PAID": 1,
-    "FAILED": 2
-}
+    'SUCCEEDED': 0,
+    'PAID': 1,
+    'FAILED': 2
+};
 
 const authenticate = async (req) => {
-    user_id = parseInt(req.params.id);
-    status_code = 200;
-    message = "";
+    let user_id = parseInt(req.params.id);
+    let status_code = 200;
+    let message = '';
 
     if (!req.isAuthenticated()) {
         status_code = 401;
-        message = "Not logged-in";
+        message = 'Not logged-in';
     } else if (!user_id) {
         status_code = 400;
-        message = "user_id is wrong";
+        message = 'user_id is wrong';
     } else if (user_id != req.user.id) {
         status_code = 403;
-        message = "Not allowed";
+        message = 'Not allowed';
     }
 
     return {
         user_id,
         status_code,
-        message, 
-    }
-}
+        message,
+    };
+};
 
 const getUserOrders = async (req, res) => {
-    const {user_id, status_code, message} = await authenticate(req);
-    if (status_code != 200){
+    const { user_id, status_code, message } = await authenticate(req);
+    if (status_code != 200) {
         res.status(status_code).json(message);
         return;
     }
@@ -43,14 +43,14 @@ const getUserOrders = async (req, res) => {
         res.status(200).json(orders);
     } catch (e) {
         console.log(e);
-        res.status(500).end("Internal Error");         
+        res.status(500).end('Internal Error');
     }
 };
 
 
 const createUserOrder = async (req, res) => {
-    const {user_id, status_code, message} = await authenticate(req);
-    if (status_code != 200){
+    const { user_id, status_code, message } = await authenticate(req);
+    if (status_code != 200) {
         res.status(status_code).json(message);
         return;
     }
@@ -61,12 +61,12 @@ const createUserOrder = async (req, res) => {
 
     const items = req.body.items;
     if (!items || _.isEmpty(items)) {
-        res.status(400).end("Input data is wrong");
+        res.status(400).end('Input data is wrong');
         return;
     }
 
     const status = parseInt(req.body.status);
-    const description = String(req.body.description || "");
+    const description = String(req.body.description || '');
 
     const order_number = shortid.generate();
     const order = {
@@ -79,27 +79,27 @@ const createUserOrder = async (req, res) => {
     try {
         const new_order = await User.createUserOrder(order, items);
         res.location('api/v1/orders/' + new_order.order_id);
-        res.status(201).json(new_order); 
+        res.status(201).json(new_order);
     } catch (e) {
         console.log(e);
-        res.status(400).end("Input data is wrong"); 
+        res.status(400).end('Input data is wrong');
     }
 
 };
 
 const deleteUserOrders = async (req, res) => {
-    const {user_id, status_code, message} = await authenticate(req);
-    if (status_code != 200){
+    const { user_id, status_code, message } = await authenticate(req);
+    if (status_code != 200) {
         res.status(status_code).json(message);
         return;
     }
 
     try {
         await User.deleteUserOrders(user_id);
-        res.status(204).end(""); 
+        res.status(204).end('');
     } catch (e) {
         console.log(e);
-        res.status(500).end("Internal Error");
+        res.status(500).end('Internal Error');
     }
 };
 
@@ -107,4 +107,4 @@ module.exports = {
     getUserOrders,
     createUserOrder,
     deleteUserOrders
-}
+};

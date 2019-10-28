@@ -2,33 +2,33 @@ const _ = require('lodash');
 const Order = require('../models/order_model');
 
 const authenticate = async (req) => {
-    order_id = parseInt(req.params.id);
-    status_code = 200;
-    message = "";
+    let order_id = parseInt(req.params.id);
+    let status_code = 200;
+    let message = '';
 
     if (!req.isAuthenticated()) {
         status_code = 401;
-        message = "Not logged-in";
+        message = 'Not logged-in';
     } else if (!order_id) {
         status_code = 400;
-        message = "order_id is wrong";
+        message = 'order_id is wrong';
     } else {
         const user_id = await Order.getOrderUserId(order_id);
         if (!user_id) {
             status_code = 400;
-            message = "order_id is wrong";
+            message = 'order_id is wrong';
         } else if (user_id != req.user.id) {
             status_code = 403;
-            message = "Not allowed";
+            message = 'Not allowed';
         }
     }
 
     return {
         order_id,
         status_code,
-        message, 
-    }
-}
+        message,
+    };
+};
 
 const getOrder = async (req, res) => {
     const {order_id, status_code, message} = await authenticate(req);
@@ -40,13 +40,13 @@ const getOrder = async (req, res) => {
     try {
         const order = await Order.getOrder(order_id);
         if (!order) {
-            res.status(404).end("NOT FOUND");
+            res.status(404).end('NOT FOUND');
         } else {
             res.status(200).json(order);
         }
     } catch (e) {
         console.log(e);
-        res.status(500).end("Internal Error");
+        res.status(500).end('Internal Error');
     }
 };
 
@@ -61,14 +61,14 @@ const updateOrder = async (req, res) => {
         return res.status(400).send('No data');
     }
 
-    status = parseInt(req.body.status);
-    description = req.body.description;
-    update = {
+    let status = parseInt(req.body.status);
+    let description = req.body.description;
+    let update = {
         status: isNaN(status) ? undefined : status,
         description: description,
-    }
+    };
 
-    items = req.body.items;
+    let items = req.body.items;
 
     try {
         const new_order = await Order.updateOrder(order_id, update, items);
@@ -76,9 +76,9 @@ const updateOrder = async (req, res) => {
         res.status(200).json(new_order);
     } catch(e) {
         console.log(e);
-        res.status(400).end("Input data is wrong"); 
+        res.status(400).end('Input data is wrong');
         return;
-    };
+    }
 };
 
 const deleteOrder = async (req, res) => {
@@ -90,10 +90,10 @@ const deleteOrder = async (req, res) => {
 
     try {
         await Order.deleteOrder(order_id);
-        res.status(204).end(""); 
+        res.status(204).end('');
     } catch(e){
         console.log(e);
-        res.status(400).end("Input data is wrong"); 
+        res.status(400).end('Input data is wrong');
         return;
     }
 };
@@ -110,7 +110,7 @@ const getOrderItems = async (req, res) => {
         res.status(200).json(order_items);
     } catch(e) {
         console.log(e);
-        res.status(500).end("Internal Error");
+        res.status(500).end('Internal Error');
     }
 };
 
@@ -123,7 +123,7 @@ const createOrderItems = async (req, res) => {
 
     const items = req.body;
     if (!items) {
-        res.status(400).end("Input data is wrong");
+        res.status(400).end('Input data is wrong');
         return;
     }
 
@@ -132,9 +132,9 @@ const createOrderItems = async (req, res) => {
         res.status(201).json(order_item);
     } catch(e) {
         console.log(e);
-        res.status(400).end("Input data is wrong"); 
+        res.status(400).end('Input data is wrong');
         return;
-    };
+    }
 };
 
 module.exports = {
@@ -143,4 +143,4 @@ module.exports = {
     deleteOrder,
     getOrderItems,
     createOrderItems,
-}
+};
