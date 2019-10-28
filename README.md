@@ -122,3 +122,8 @@
         }
         ```  
     3. delete: api/v1/items/:id
+
+### Get Product Image
+
+1. localhost:<post>/<image_url>
+2. `image_url` will be returned by product api.
