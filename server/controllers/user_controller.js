@@ -8,7 +8,7 @@ const ORDER_STATUS = {
     'FAILED': 2
 };
 
-const authenticate = async (req) => {
+const authenticate = async (req, res, next) => {
     let user_id = parseInt(req.params.id);
     let status_code = 200;
     let message = '';
@@ -24,19 +24,15 @@ const authenticate = async (req) => {
         message = 'Not allowed';
     }
 
-    return {
-        user_id,
-        status_code,
-        message,
-    };
+    if (status_code != 200) {
+        res.status(status_code).json(message);
+    } else {
+        next();
+    }
 };
 
 const getUserOrders = async (req, res) => {
-    const { user_id, status_code, message } = await authenticate(req);
-    if (status_code != 200) {
-        res.status(status_code).json(message);
-        return;
-    }
+    const user_id = parseInt(req.params.id);
 
     try {
         const orders = await User.getUserOrders(user_id);
@@ -49,11 +45,7 @@ const getUserOrders = async (req, res) => {
 
 
 const createUserOrder = async (req, res) => {
-    const { user_id, status_code, message } = await authenticate(req);
-    if (status_code != 200) {
-        res.status(status_code).json(message);
-        return;
-    }
+    const user_id = parseInt(req.params.id);
 
     if (!req || _.isEmpty(req.body) || _.isEmpty(req.params)) {
         return res.status(400).send('No data');
@@ -88,11 +80,7 @@ const createUserOrder = async (req, res) => {
 };
 
 const deleteUserOrders = async (req, res) => {
-    const { user_id, status_code, message } = await authenticate(req);
-    if (status_code != 200) {
-        res.status(status_code).json(message);
-        return;
-    }
+    const user_id = parseInt(req.params.id);
 
     try {
         await User.deleteUserOrders(user_id);
@@ -104,6 +92,7 @@ const deleteUserOrders = async (req, res) => {
 };
 
 module.exports = {
+    authenticate,
     getUserOrders,
     createUserOrder,
     deleteUserOrders

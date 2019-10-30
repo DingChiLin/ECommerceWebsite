@@ -1,6 +1,6 @@
 const Item = require('../models/item_model');
 
-const authenticate = async (req) => {
+const authenticate = async (req, res, next) => {
     let item_id = parseInt(req.params.id);
     let status_code = 200;
     let message = '';
@@ -22,20 +22,15 @@ const authenticate = async (req) => {
         }
     }
 
-    return {
-        item_id,
-        status_code,
-        message,
-    };
-};
-
-
-const getItem = async (req, res) => {
-    const {item_id, status_code, message} = await authenticate(req);
     if (status_code != 200) {
         res.status(status_code).json(message);
-        return;
+    } else {
+        next();
     }
+};
+
+const getItem = async (req, res) => {
+    const item_id = parseInt(req.params.id);
 
     try {
         const item = await Item.getItem(item_id);
@@ -48,11 +43,7 @@ const getItem = async (req, res) => {
 };
 
 const updateItem = async (req, res) => {
-    const {item_id, status_code, message} = await authenticate(req);
-    if (status_code != 200) {
-        res.status(status_code).json(message);
-        return;
-    }
+    const item_id = parseInt(req.params.id);
 
     const update = req.body;
     if (!update) {
@@ -71,11 +62,7 @@ const updateItem = async (req, res) => {
 };
 
 const deleteItem = async (req, res) => {
-    const {item_id, status_code, message} = await authenticate(req);
-    if (status_code != 200) {
-        res.status(status_code).json(message);
-        return;
-    }
+    const item_id = parseInt(req.params.id);
 
     try {
         await Item.deleteItem(item_id);
@@ -88,6 +75,7 @@ const deleteItem = async (req, res) => {
 };
 
 module.exports = {
+    authenticate,
     getItem,
     updateItem,
     deleteItem,

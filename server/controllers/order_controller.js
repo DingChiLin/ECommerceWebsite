@@ -2,7 +2,7 @@ const _ = require('lodash');
 const Order = require('../models/order_model');
 const Product = require('../models/product_model');
 
-const authenticate = async (req) => {
+const authenticate = async (req, res, next) => {
     let order_id = parseInt(req.params.id);
     let status_code = 200;
     let message = '';
@@ -24,19 +24,15 @@ const authenticate = async (req) => {
         }
     }
 
-    return {
-        order_id,
-        status_code,
-        message,
-    };
+    if (status_code != 200){
+        res.status(status_code).json(message);
+    } else {
+        next();
+    }
 };
 
 const getOrder = async (req, res) => {
-    const {order_id, status_code, message} = await authenticate(req);
-    if (status_code != 200){
-        res.status(status_code).json(message);
-        return;
-    }
+    const order_id = parseInt(req.params.id);
 
     try {
         const order = await Order.getOrder(order_id);
@@ -52,11 +48,7 @@ const getOrder = async (req, res) => {
 };
 
 const updateOrder = async (req, res) => {
-    const {order_id, status_code, message} = await authenticate(req);
-    if (status_code != 200){
-        res.status(status_code).json(message);
-        return;
-    }
+    const order_id = parseInt(req.params.id);
 
     if (!req || _.isEmpty(req.body)) {
         return res.status(400).send('No data');
@@ -83,11 +75,7 @@ const updateOrder = async (req, res) => {
 };
 
 const deleteOrder = async (req, res) => {
-    const {order_id, status_code, message} = await authenticate(req);
-    if (status_code != 200){
-        res.status(status_code).json(message);
-        return;
-    }
+    const order_id = parseInt(req.params.id);
 
     try {
         await Order.deleteOrder(order_id);
@@ -100,17 +88,16 @@ const deleteOrder = async (req, res) => {
 };
 
 const getOrderItems = async (req, res) => {
-    const {order_id, status_code, message} = await authenticate(req);
-    if (status_code != 200){
-        res.status(status_code).json(message);
-        return;
-    }
+    const order_id = parseInt(req.params.id);
 
     try {
         const order_items = await Order.getOrderItems(order_id);
         const product_ids = _.uniq(order_items.map(item => item.product_id));
         const products = await Product.getProducts(product_ids);
-        const products_map = _.groupBy(products, prod => prod.id);
+        const products_map = products.reduce((obj, prod) => {
+            obj[prod.id] = prod;
+            return obj;
+        }, {});
 
         order_items.map(item => {
             item.product = products_map[item.product_id];
@@ -124,11 +111,7 @@ const getOrderItems = async (req, res) => {
 };
 
 const createOrderItems = async (req, res) => {
-    const {order_id, status_code, message} = await authenticate(req);
-    if (status_code != 200){
-        res.status(status_code).json(message);
-        return;
-    }
+    const order_id = parseInt(req.params.id);
 
     const items = req.body;
     if (!items) {
@@ -147,6 +130,7 @@ const createOrderItems = async (req, res) => {
 };
 
 module.exports = {
+    authenticate,
     getOrder,
     updateOrder,
     deleteOrder,

@@ -1,6 +1,6 @@
 const Product = require('../models/product_model');
 
-const authenticate = async (req) => {
+const authenticate = async (req, res, next) => {
     let status_code = 200;
     let message = '';
 
@@ -9,19 +9,14 @@ const authenticate = async (req) => {
         message = 'Not logged-in';
     }
 
-    return {
-        status_code,
-        message,
-    };
+    if (status_code != 200) {
+        res.status(status_code).json(message);
+    } else {
+        next();
+    }
 };
 
 const getProducts = async (req, res) => {
-    const {status_code, message} = await authenticate(req);
-    if (status_code != 200) {
-        res.status(status_code).json(message);
-        return;
-    }
-
     try {
         const products = await Product.getProducts();
         res.status(200).json(products);
@@ -33,12 +28,6 @@ const getProducts = async (req, res) => {
 };
 
 const getProduct = async (req, res) => {
-    const {status_code, message} = await authenticate(req);
-    if (status_code != 200) {
-        res.status(status_code).json(message);
-        return;
-    }
-
     const product_id = parseInt(req.params.id);
     if (!product_id) {
         res.status(400).end('id should be integer');
@@ -56,6 +45,7 @@ const getProduct = async (req, res) => {
 };
 
 module.exports = {
+    authenticate,
     getProducts,
     getProduct
 };
