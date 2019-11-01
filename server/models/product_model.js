@@ -1,7 +1,4 @@
-const pg = require('knex')({
-    client: 'pg',
-    connection: process.env.DATABASE_URL
-});
+const pg = require('./database');
 
 const getProduct = async (product_id) => {
     return pg('products')
@@ -12,14 +9,14 @@ const getProduct = async (product_id) => {
 };
 
 const getProducts = async (ids) => {
-	if (ids){
-		return pg('products')
-			.whereIn('id', ids)
-			.select(['id', 'name', 'price', 'small_image_url']);
-	} else {
-	    return pg('products')
-			.select(['id', 'name', 'price', 'small_image_url']);
-	}
+    if (ids){
+        return pg('products')
+            .whereIn('id', ids)
+            .select(['id', 'name', 'price', 'small_image_url']);
+    } else {
+        return pg('products')
+            .select(['id', 'name', 'price', 'small_image_url']);
+    }
 };
 
 module.exports = {

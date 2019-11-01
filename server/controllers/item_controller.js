@@ -5,10 +5,7 @@ const authenticate = async (req, res, next) => {
     let status_code = 200;
     let message = '';
 
-    if (!req.isAuthenticated()) {
-        status_code = 401;
-        message = 'Not logged-in';
-    } else if (!item_id) {
+    if (!item_id) {
         status_code = 400;
         message = 'item_id is wrong';
     } else {

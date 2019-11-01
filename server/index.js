@@ -56,12 +56,18 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-app.use('/api/v1', [
-    require('./routes/product_routes'),
-    require('./routes/user_routes'),
-    require('./routes/order_routes'),
-    require('./routes/item_routes')
-]);
+app.use('/api/v1',
+    (req, res, next) => {
+        if (!req.isAuthenticated()) { return res.status(401).json('Not logged-in');}
+        return next();
+    },
+    [
+        require('./routes/product_routes'),
+        require('./routes/user_routes'),
+        require('./routes/order_routes'),
+        require('./routes/item_routes')
+    ]
+);
 
 app.get('/', (req, res) => {
     res.send('Home page!');
@@ -71,17 +77,12 @@ app.get('/api/v1/login', (req, res) => {
     res.send('Login page!');
 });
 
-app.post('/api/v1/login', (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
-        if(info) {return res.send(info.message);}
-        if (err) { return next(err); }
-        if (!user) { return res.redirect('/login'); }
-        req.login(user, (err) => {
-            if (err) { return next(err); }
-            return res.send('Login Succeeded!');
-        });
-    })(req, res, next);
-});
+app.post('/api/v1/login',
+    passport.authenticate('local'),
+    (req, res) => {
+        return res.send('Login Succeeded!');
+    }
+);
 
 app.listen(port, () => {
     console.log(`Listening on port ${port}...`);

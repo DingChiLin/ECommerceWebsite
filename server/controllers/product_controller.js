@@ -1,21 +1,5 @@
 const Product = require('../models/product_model');
 
-const authenticate = async (req, res, next) => {
-    let status_code = 200;
-    let message = '';
-
-    if (!req.isAuthenticated()) {
-        status_code = 401;
-        message = 'Not logged-in';
-    }
-
-    if (status_code != 200) {
-        res.status(status_code).json(message);
-    } else {
-        next();
-    }
-};
-
 const getProducts = async (req, res) => {
     try {
         const products = await Product.getProducts();
@@ -45,7 +29,6 @@ const getProduct = async (req, res) => {
 };
 
 module.exports = {
-    authenticate,
     getProducts,
     getProduct
 };

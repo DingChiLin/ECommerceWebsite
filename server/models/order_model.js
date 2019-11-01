@@ -1,8 +1,5 @@
 const moment = require('moment');
-const pg = require('knex')({
-    client: 'pg',
-    connection: process.env.DATABASE_URL
-});
+const pg = require('./database');
 
 const getOrderUserId = async (order_id) => {
     const [order] = await pg('orders')
@@ -70,7 +67,6 @@ const updateOrder = async (order_id, update, items) => {
 
         return new_order;
     });
-
 };
 
 const deleteOrder = async (order_id) => {

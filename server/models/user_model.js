@@ -1,8 +1,5 @@
 const moment = require('moment');
-const pg = require('knex')({
-    client: 'pg',
-    connection: process.env.DATABASE_URL
-});
+const pg = require('./database');
 
 const getUserOrders = async (user_id) => {
     const orders = await pg('orders')
