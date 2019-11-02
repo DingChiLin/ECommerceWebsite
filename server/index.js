@@ -73,11 +73,32 @@ app.get('/', (req, res) => {
     res.send('Home page!');
 });
 
-app.get('/api/v1/login', (req, res) => {
+/**
+ * @api {get} /login GetLoginPage
+ * @apiGroup Login
+ * @apiVersion 0.1.0
+ *
+ * @apiSuccessExample {String} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     "Login page!"
+ */
+app.get('/login', (req, res) => {
     res.send('Login page!');
 });
 
-app.post('/api/v1/login',
+/**
+ * @api {post} /login Login
+ * @apiGroup Login
+ * @apiVersion 0.1.0
+ * 
+ * @apiParam {String} email
+ * @apiParam {String} password
+ *
+ * @apiSuccessExample {String} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     "Login Succeeded!"
+ */
+app.post('/login',
     passport.authenticate('local'),
     (req, res) => {
         return res.send('Login Succeeded!');

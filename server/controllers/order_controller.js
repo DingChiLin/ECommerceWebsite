@@ -28,6 +28,30 @@ const authenticate = async (req, res, next) => {
     }
 };
 
+/**
+ * @api {get} api/v1/orders/:id GetOrder
+ * @apiGroup Order 
+ * @apiVersion 0.1.0
+ * 
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "id": 1,
+ *       "user_id": 1,
+ *       "status": 0,
+ *       "order_number": "1SLbpt5b",
+ *       "description": "a new order",
+ *       "created_at": "2019-10-30T14:13:52.000Z",
+ *       "updated_at": "2019-10-30T14:13:52.000Z",
+ *       "link": [
+ *         {
+ *           "rel": "items",
+ *           "method": "get",
+ *           "href": "/api/v1/orders/1/items"
+ *         }
+ *       ]
+ *    }
+ */
 const getOrder = async (req, res) => {
     const order_id = parseInt(req.params.id);
 
@@ -44,6 +68,37 @@ const getOrder = async (req, res) => {
     }
 };
 
+/**
+ * @api {patch} api/v1/orders/:id UpdateOrder
+ * @apiGroup Order
+ * @apiVersion 0.1.0
+ * 
+ * @apiParam {Number} [status]
+ * @apiParam {String} [description]
+ *
+ * @apiParam {Object[]} [items]
+ * @apiParam {Number} items[product_id]
+ * @apiParam {Number} items[number]
+ * 
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "id": 1,
+ *       "user_id": 1,
+ *       "status": 0,
+ *       "order_number": "1SLbpt5b",
+ *       "description": "a new order",
+ *       "created_at": "2019-10-30T14:13:52.000Z",
+ *       "updated_at": "2019-10-30T14:13:52.000Z",
+ *       "link": [
+ *         {
+ *           "rel": "items",
+ *           "method": "get",
+ *           "href": "/api/v1/orders/1/items"
+ *         }
+ *       ]
+ *    }
+ */
 const updateOrder = async (req, res) => {
     const order_id = parseInt(req.params.id);
 
@@ -71,6 +126,14 @@ const updateOrder = async (req, res) => {
     }
 };
 
+/**
+ * @api {delete} api/v1/orders/:id DeleteOrder
+ * @apiGroup Order
+ * @apiVersion 0.1.0
+ * 
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 204 OK
+ */
 const deleteOrder = async (req, res) => {
     const order_id = parseInt(req.params.id);
 
@@ -84,6 +147,30 @@ const deleteOrder = async (req, res) => {
     }
 };
 
+/**
+ * @api {get} api/v1/orders/:id/items GetOrderItems
+ * @apiGroup Order
+ * @apiVersion 0.1.0
+ * 
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     [
+ *       {
+ *         "id": 1,
+ *         "order_id": 1,
+ *         "product_id": 2,
+ *         "number": 10,
+ *         "created_at": "2019-10-30T14:09:44.000Z",
+ *         "updated_at": "2019-10-30T14:09:44.000Z",
+ *         "product": {
+ *           "id": 2,
+ *           "name": "iphone 11",
+ *           "price": 880,
+ *           "small_image_url": "small_images/iphone_11.jpg"
+ *         }
+ *       }
+ *     ]
+ */
 const getOrderItems = async (req, res) => {
     const order_id = parseInt(req.params.id);
 
@@ -106,6 +193,29 @@ const getOrderItems = async (req, res) => {
         res.status(500).end('Internal Error');
     }
 };
+
+/**
+ * @api {post} api/v1/orders/:id/items CreateOrderItems
+ * @apiGroup Order
+ * @apiVersion 0.1.0
+ *
+ * @apiParam {Object[]} items
+ * @apiParam {Number} items[product_id]
+ * @apiParam {Number} items[number]
+ * 
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 201 OK
+ *     [
+ *       {
+ *         "id": 1,
+ *         "order_id": 1,
+ *         "product_id": 2,
+ *         "number": 10,
+ *         "created_at": "2019-10-30T14:09:44.000Z",
+ *         "updated_at": "2019-10-30T14:09:44.000Z",
+ *       }
+ *     ]
+ */
 
 const createOrderItems = async (req, res) => {
     const order_id = parseInt(req.params.id);

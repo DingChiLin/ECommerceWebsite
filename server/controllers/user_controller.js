@@ -28,6 +28,31 @@ const authenticate = async (req, res, next) => {
     }
 };
 
+/**
+ * @api {get} api/v1/users/:id/orders GetUserOrders
+ * @apiGroup User
+ * @apiVersion 0.1.0
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     [
+ *       {
+ *         "id": 1,
+ *         "user_id": 1,
+ *         "status": 0,
+ *         "order_number": "1SLbpt5b",
+ *         "description": "my order",
+ *         "created_at": "2019-10-30T14:13:52.000Z",
+ *         "updated_at": "2019-10-30T14:13:52.000Z",
+ *         "link": [
+ *           {
+ *             "rel": "items",
+ *             "method": "get",
+ *             "href": "/api/v1/orders/1/items"
+ *           }
+ *         ]
+ *       }
+ *     ]
+ */
 const getUserOrders = async (req, res) => {
     const user_id = parseInt(req.params.id);
 
@@ -40,7 +65,37 @@ const getUserOrders = async (req, res) => {
     }
 };
 
-
+/**
+ * @api {post} api/v1/users/:id/orders CreateUserOrder
+ * @apiGroup User
+ * @apiVersion 0.1.0
+ * 
+ * @apiParam {Number} [status]
+ * @apiParam {String} [description]
+ *
+ * @apiParam {Object[]} items
+ * @apiParam {Number} items[product_id]
+ * @apiParam {Number} items[number]
+ * 
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 201 OK
+ *     {
+ *       "id": 1,
+ *       "user_id": 1,
+ *       "status": 0,
+ *       "order_number": "1SLbpt5b",
+ *       "description": "a new order",
+ *       "created_at": "2019-10-30T14:13:52.000Z",
+ *       "updated_at": "2019-10-30T14:13:52.000Z",
+ *       "link": [
+ *         {
+ *           "rel": "items",
+ *           "method": "get",
+ *           "href": "/api/v1/orders/1/items"
+ *         }
+ *       ]
+ *    }
+ */
 const createUserOrder = async (req, res) => {
     const user_id = parseInt(req.params.id);
 
@@ -76,6 +131,14 @@ const createUserOrder = async (req, res) => {
 
 };
 
+/**
+ * @api {delete} api/v1/users/:id/orders DeleteUserOrders
+ * @apiGroup User
+ * @apiVersion 0.1.0
+ * 
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 204 OK
+ */
 const deleteUserOrders = async (req, res) => {
     const user_id = parseInt(req.params.id);
 
