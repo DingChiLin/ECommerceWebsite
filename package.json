@@ -8,7 +8,9 @@
   },
   "scripts": {
     "create_fake_data": "node test/create_fake_data.js",
-    "start": "nodemon --ignore sessions/ server/index.js"
+    "init-assets": "apidoc -i server/ -o server/docs/",
+    "init-server": "nodemon --ignore sessions/ server/index.js",
+    "start": "npm run init-assets && npm run init-server"
   },
   "repository": {
     "type": "git",

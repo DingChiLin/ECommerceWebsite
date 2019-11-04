@@ -4,6 +4,7 @@ const express = require('express');
 const LocalStrategy = require('passport-local').Strategy;
 const morgan = require('morgan');
 const passport = require('passport');
+const path = require('path');
 const pg = require('knex')({
     client: 'pg',
     connection: process.env.DATABASE_URL
@@ -56,6 +57,7 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use('/api', express.static(path.join(__dirname + '/docs')));
 app.use('/api/v1',
     (req, res, next) => {
         if (!req.isAuthenticated()) { return res.status(401).json('Not logged-in');}
@@ -83,14 +85,14 @@ app.get('/', (req, res) => {
  *     "Login page!"
  */
 app.get('/login', (req, res) => {
-    res.send('Login page!');
+    res.sendFile(path.join(__dirname + '/views/login/index.html'));
 });
 
 /**
  * @api {post} /login Login
  * @apiGroup Login
  * @apiVersion 0.1.0
- * 
+ *
  * @apiParam {String} email
  * @apiParam {String} password
  *
@@ -101,7 +103,7 @@ app.get('/login', (req, res) => {
 app.post('/login',
     passport.authenticate('local'),
     (req, res) => {
-        return res.send('Login Succeeded!');
+        return res.send(`<h4>Welcome! ${req.user.name}</h4> <a href="/api">API list</a>`);
     }
 );
 

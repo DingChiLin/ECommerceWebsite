@@ -20,11 +20,11 @@
     1. ```npm run create_fake_data```
 6. Start the server
     1. ```npm run start```
-7. Generate API documents: `apidoc -i server/ -o docs/`
-    1. Location of generated api document: `docs/index.html`
-    2. [document generator](https://apidocjs.com/)
-8. Login to the server for local testing:
-    1. There are 3 fake users created in step 5
+7. Login to the server for local testing:
+    1. Login:
+        1. Login through login page: `localhost:<port>/login`
+        2. Login through API: see the `Login` part in path `localhost:<port>/api`
+    2. There are 3 fake users created in step 5
         1. user1
             1. email: `user1@gmail.com`
             2. password: `user1password`
@@ -34,9 +34,8 @@
         3. user3
             1. email: `user3@gmail.com`
             2. password: `user3password`
-    2. See the `Login` part of the APIs document created in step 7
-9. Call each API to get products list and create/update/delete orders
-    1. See the APIs document created in step 7
+8. Call each API to get products list and create/update/delete orders
+    1. See the APIs document in path `localhost:<port>/api`
 
 ### Get Product Image
 
