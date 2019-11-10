@@ -1,12 +1,4 @@
-require('dotenv').config();
-const moment = require('moment');
-
-var pg = require('knex')({
-    client: 'pg',
-    connection: process.env.DATABASE_URL
-});
-
-let raw_products = [
+const rawProducts = [
     {
         'name': 'google pixel 4',
         'price': 800,
@@ -37,7 +29,7 @@ let raw_products = [
     }
 ];
 
-let raw_users = [
+const rawUsers = [
     {
         'name': 'user1',
         'email': 'user1@gmail.com',
@@ -58,32 +50,40 @@ let raw_users = [
     },
 ];
 
-let now = moment().format();
-const products = raw_products.map(obj => {
-    obj.created_at = now;
-    obj.updated_at = now;
-    return obj;
-});
+const correctOrder = {
+    description: 'correct order',
+    status: 0,
+    items: [
+        {
+            'product_id': 1,
+            'number': 2,
+        },
+        {
+            'product_id': 2,
+            'number': 5,
+        }
+    ]
+};
 
-const users = raw_users.map(obj => {
-    obj.created_at = now;
-    obj.updated_at = now;
-    return obj;
-});
+const orderWithWrongStatus = {
+    description: 'order with wrong status',
+    status: 'q'
+};
 
-async function createFakeData() {
-    try {
-        await pg.schema
-            .raw('TRUNCATE TABLE products RESTART IDENTITY CASCADE')
-            .raw('TRUNCATE TABLE users RESTART IDENTITY CASCADE');
-        await pg('products').insert(products);
-        await pg('users').insert(users);
+const orderWithWrongItems = {
+    description: 'order with wrong items',
+    items: [
+        {
+            'product_id': 'a',
+            'number': 2,
+        }
+    ]
+};
 
-    } catch (e) {
-        console.log(e);
-    } finally {
-        pg.destroy();
-    }
-}
-
-createFakeData().catch(console.log);
+module.exports = {
+    rawProducts,
+    rawUsers,
+    correctOrder,
+    orderWithWrongStatus,
+    orderWithWrongItems
+};

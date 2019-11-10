@@ -3,26 +3,26 @@ const Order = require('../models/order_model');
 const Product = require('../models/product_model');
 
 const authenticate = async (req, res, next) => {
-    let order_id = parseInt(req.params.id);
-    let status_code = 200;
+    let orderId = parseInt(req.params.id);
+    let statusCode = 200;
     let message = '';
 
-    if (!order_id) {
-        status_code = 400;
-        message = 'order_id is wrong';
+    if (!orderId) {
+        statusCode = 400;
+        message = 'order id is wrong';
     } else {
-        const user_id = await Order.getOrderUserId(order_id);
-        if (!user_id) {
-            status_code = 400;
-            message = 'order_id is wrong';
-        } else if (user_id != req.user.id) {
-            status_code = 403;
+        const userId = await Order.getOrderUserId(orderId);
+        if (!userId) {
+            statusCode = 400;
+            message = 'order id is wrong';
+        } else if (userId != req.user.id) {
+            statusCode = 403;
             message = 'Not allowed';
         }
     }
 
-    if (status_code != 200){
-        res.status(status_code).json(message);
+    if (statusCode != 200){
+        res.status(statusCode).json(message);
     } else {
         next();
     }
@@ -30,9 +30,9 @@ const authenticate = async (req, res, next) => {
 
 /**
  * @api {get} api/v1/orders/:id GetOrder
- * @apiGroup Order 
+ * @apiGroup Order
  * @apiVersion 0.1.0
- * 
+ *
  * @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 200 OK
  *     {
@@ -52,19 +52,18 @@ const authenticate = async (req, res, next) => {
  *       ]
  *    }
  */
-const getOrder = async (req, res) => {
-    const order_id = parseInt(req.params.id);
+const getOrder = async (req, res, next) => {
+    const orderId = parseInt(req.params.id);
 
     try {
-        const order = await Order.getOrder(order_id);
+        const order = await Order.getOrder(orderId);
         if (!order) {
             res.status(404).end('NOT FOUND');
         } else {
             res.status(200).json(order);
         }
     } catch (e) {
-        console.log(e);
-        res.status(500).end('Internal Error');
+        next(e);
     }
 };
 
@@ -72,14 +71,14 @@ const getOrder = async (req, res) => {
  * @api {patch} api/v1/orders/:id UpdateOrder
  * @apiGroup Order
  * @apiVersion 0.1.0
- * 
+ *
  * @apiParam {Number} [status]
  * @apiParam {String} [description]
  *
  * @apiParam {Object[]} [items]
  * @apiParam {Number} items[product_id]
  * @apiParam {Number} items[number]
- * 
+ *
  * @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 200 OK
  *     {
@@ -99,8 +98,8 @@ const getOrder = async (req, res) => {
  *       ]
  *    }
  */
-const updateOrder = async (req, res) => {
-    const order_id = parseInt(req.params.id);
+const updateOrder = async (req, res, next) => {
+    const orderId = parseInt(req.params.id);
 
     if (!req || _.isEmpty(req.body)) {
         return res.status(400).send('No data');
@@ -116,13 +115,11 @@ const updateOrder = async (req, res) => {
     let items = req.body.items;
 
     try {
-        const new_order = await Order.updateOrder(order_id, update, items);
-        res.location('api/v1/orders/' + new_order.order_id);
-        res.status(200).json(new_order);
+        const newOrder = await Order.updateOrder(orderId, update, items);
+        res.location('api/v1/orders/' + newOrder.order_id);
+        res.status(200).json(newOrder);
     } catch(e) {
-        console.log(e);
-        res.status(400).end('Input data is wrong');
-        return;
+        next(e);
     }
 };
 
@@ -130,20 +127,18 @@ const updateOrder = async (req, res) => {
  * @api {delete} api/v1/orders/:id DeleteOrder
  * @apiGroup Order
  * @apiVersion 0.1.0
- * 
+ *
  * @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 204 OK
  */
-const deleteOrder = async (req, res) => {
-    const order_id = parseInt(req.params.id);
+const deleteOrder = async (req, res, next) => {
+    const orderId = parseInt(req.params.id);
 
     try {
-        await Order.deleteOrder(order_id);
+        await Order.deleteOrder(orderId);
         res.status(204).end('');
     } catch(e){
-        console.log(e);
-        res.status(400).end('Input data is wrong');
-        return;
+        next(e);
     }
 };
 
@@ -151,7 +146,7 @@ const deleteOrder = async (req, res) => {
  * @api {get} api/v1/orders/:id/items GetOrderItems
  * @apiGroup Order
  * @apiVersion 0.1.0
- * 
+ *
  * @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 200 OK
  *     [
@@ -171,26 +166,25 @@ const deleteOrder = async (req, res) => {
  *       }
  *     ]
  */
-const getOrderItems = async (req, res) => {
-    const order_id = parseInt(req.params.id);
+const getOrderItems = async (req, res, next) => {
+    const orderId = parseInt(req.params.id);
 
     try {
-        const order_items = await Order.getOrderItems(order_id);
-        const product_ids = _.uniq(order_items.map(item => item.product_id));
-        const products = await Product.getProducts(product_ids);
-        const products_map = products.reduce((obj, prod) => {
+        const orderItems = await Order.getOrderItems(orderId);
+        const productIds = _.uniq(orderItems.map(item => item.product_id));
+        const products = await Product.getProducts(productIds);
+        const productsMap = products.reduce((obj, prod) => {
             obj[prod.id] = prod;
             return obj;
         }, {});
 
-        order_items.map(item => {
-            item.product = products_map[item.product_id];
+        orderItems.map(item => {
+            item.product = productsMap[item.product_id];
         });
 
-        res.status(200).json(order_items);
+        res.status(200).json(orderItems);
     } catch(e) {
-        console.log(e);
-        res.status(500).end('Internal Error');
+        next(e);
     }
 };
 
@@ -202,7 +196,7 @@ const getOrderItems = async (req, res) => {
  * @apiParam {Object[]} items
  * @apiParam {Number} items[product_id]
  * @apiParam {Number} items[number]
- * 
+ *
  * @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 201 OK
  *     [
@@ -217,8 +211,8 @@ const getOrderItems = async (req, res) => {
  *     ]
  */
 
-const createOrderItems = async (req, res) => {
-    const order_id = parseInt(req.params.id);
+const createOrderItems = async (req, res, next) => {
+    const orderId = parseInt(req.params.id);
 
     const items = req.body;
     if (!items) {
@@ -227,12 +221,10 @@ const createOrderItems = async (req, res) => {
     }
 
     try {
-        const order_item = await Order.createOrderItems(order_id, items);
-        res.status(201).json(order_item);
+        const orderItem = await Order.createOrderItems(orderId, items);
+        res.status(201).json(orderItem);
     } catch(e) {
-        console.log(e);
-        res.status(400).end('Input data is wrong');
-        return;
+        next(e);
     }
 };
 

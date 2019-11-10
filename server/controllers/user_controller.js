@@ -9,20 +9,20 @@ const ORDER_STATUS = {
 };
 
 const authenticate = async (req, res, next) => {
-    let user_id = parseInt(req.params.id);
-    let status_code = 200;
+    let userId = parseInt(req.params.id);
+    let statusCode = 200;
     let message = '';
 
-    if (!user_id) {
-        status_code = 400;
-        message = 'user_id is wrong';
-    } else if (user_id != req.user.id) {
-        status_code = 403;
+    if (!userId) {
+        statusCode = 400;
+        message = 'user id is wrong';
+    } else if (userId != req.user.id) {
+        statusCode = 403;
         message = 'Not allowed';
     }
 
-    if (status_code != 200) {
-        res.status(status_code).json(message);
+    if (statusCode != 200) {
+        res.status(statusCode).json(message);
     } else {
         next();
     }
@@ -53,15 +53,14 @@ const authenticate = async (req, res, next) => {
  *       }
  *     ]
  */
-const getUserOrders = async (req, res) => {
-    const user_id = parseInt(req.params.id);
+const getUserOrders = async (req, res, next) => {
+    const userId = parseInt(req.params.id);
 
     try {
-        const orders = await User.getUserOrders(user_id);
+        const orders = await User.getUserOrders(userId);
         res.status(200).json(orders);
     } catch (e) {
-        console.log(e);
-        res.status(500).end('Internal Error');
+        next(e);
     }
 };
 
@@ -69,14 +68,14 @@ const getUserOrders = async (req, res) => {
  * @api {post} api/v1/users/:id/orders CreateUserOrder
  * @apiGroup User
  * @apiVersion 0.1.0
- * 
+ *
  * @apiParam {Number} [status]
  * @apiParam {String} [description]
  *
  * @apiParam {Object[]} items
  * @apiParam {Number} items[product_id]
  * @apiParam {Number} items[number]
- * 
+ *
  * @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 201 OK
  *     {
@@ -96,8 +95,8 @@ const getUserOrders = async (req, res) => {
  *       ]
  *    }
  */
-const createUserOrder = async (req, res) => {
-    const user_id = parseInt(req.params.id);
+const createUserOrder = async (req, res, next) => {
+    const userId = parseInt(req.params.id);
 
     if (!req || _.isEmpty(req.body) || _.isEmpty(req.params)) {
         return res.status(400).send('No data');
@@ -112,42 +111,39 @@ const createUserOrder = async (req, res) => {
     const status = parseInt(req.body.status);
     const description = String(req.body.description || '');
 
-    const order_number = shortid.generate();
+    const orderNumber = shortid.generate();
     const order = {
-        user_id: user_id,
+        user_id: userId,
         status: isNaN(status) ? ORDER_STATUS.SUCCEEDED : status,
-        order_number: order_number,
+        order_number: orderNumber,
         description: description
     };
 
     try {
-        const new_order = await User.createUserOrder(order, items);
-        res.location('api/v1/orders/' + new_order.order_id);
-        res.status(201).json(new_order);
+        const newOrder = await User.createUserOrder(order, items);
+        res.location('api/v1/orders/' + newOrder.order_id);
+        res.status(201).json(newOrder);
     } catch (e) {
-        console.log(e);
-        res.status(400).end('Input data is wrong');
+        next(e);
     }
-
 };
 
 /**
  * @api {delete} api/v1/users/:id/orders DeleteUserOrders
  * @apiGroup User
  * @apiVersion 0.1.0
- * 
+ *
  * @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 204 OK
  */
-const deleteUserOrders = async (req, res) => {
-    const user_id = parseInt(req.params.id);
+const deleteUserOrders = async (req, res, next) => {
+    const userId = parseInt(req.params.id);
 
     try {
-        await User.deleteUserOrders(user_id);
+        await User.deleteUserOrders(userId);
         res.status(204).end('');
     } catch (e) {
-        console.log(e);
-        res.status(500).end('Internal Error');
+        next(e);
     }
 };
 

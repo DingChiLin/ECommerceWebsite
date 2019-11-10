@@ -1,19 +1,19 @@
 const moment = require('moment');
 const pg = require('./database');
 
-const getOrderUserId = async (order_id) => {
+const getOrderUserId = async (orderId) => {
     const [order] = await pg('orders')
         .select('user_id')
-        .where({id: order_id});
+        .where({id: orderId});
     if (!order){ return; }
     return order.user_id;
 };
 
-const getOrder = async (order_id) => {
+const getOrder = async (orderId) => {
     const [order] = await pg('orders')
         .select()
         .where({
-            id: order_id
+            id: orderId
         })
         .catch(e => {
             console.log(e);
@@ -25,19 +25,19 @@ const getOrder = async (order_id) => {
     }
 
     order['link'] = [
-        { 'rel':'items', 'method':'get', 'href':`/api/v1/orders/${order_id}/items` }
+        { 'rel':'items', 'method':'get', 'href':`/api/v1/orders/${orderId}/items` }
     ];
 
     return order;
 };
 
-const updateOrder = async (order_id, update, items) => {
+const updateOrder = async (orderId, update, items) => {
     const now = moment().format();
     update.updated_at = now;
 
     return pg.transaction(async (trx) => {
-        const [new_order] = await pg('orders')
-            .where({id: order_id})
+        const [newOrder] = await pg('orders')
+            .where({id: orderId})
             .update(update)
             .returning('*')
             .catch(e => {
@@ -47,54 +47,54 @@ const updateOrder = async (order_id, update, items) => {
 
         if (items) {
             await trx('order_items')
-                .where({order_id})
+                .where({orderId})
                 .delete();
 
-            const order_items = items.map(obj => {
-                obj.order_id = order_id;
+            const orderItems = items.map(obj => {
+                obj.order_id = orderId;
                 obj.created_at = now;
                 obj.updated_at = now;
                 return obj;
             });
 
             await trx('order_items')
-                .insert(order_items);
+                .insert(orderItems);
         }
 
-        new_order['link'] = [
-            { 'rel':'items', 'method':'get', 'href':`/api/v1/orders/${order_id}/items` }
+        newOrder['link'] = [
+            { 'rel':'items', 'method':'get', 'href':`/api/v1/orders/${orderId}/items` }
         ];
 
-        return new_order;
+        return newOrder;
     });
 };
 
-const deleteOrder = async (order_id) => {
+const deleteOrder = async (orderId) => {
     return pg('orders')
-        .where({id: order_id})
+        .where({id: orderId})
         .delete();
 };
 
-const getOrderItems = async (order_id) => {
+const getOrderItems = async (orderId) => {
     return pg('order_items')
         .select()
         .where({
-            order_id
+            order_id: orderId
         })
         .orderBy('id');
 };
 
-const createOrderItems = async (order_id, items) => {
+const createOrderItems = async (orderId, items) => {
     const now = moment().format();
-    const order_items = items.map(item => {
-        item.order_id = order_id;
+    const orderItems = items.map(item => {
+        item.order_id = orderId;
         item.created_at = now;
         item.updated_at = now;
         return item;
     });
 
     return pg('order_items')
-        .insert(order_items)
+        .insert(orderItems)
         .returning('*');
 };
 

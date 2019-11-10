@@ -5,18 +5,16 @@ const LocalStrategy = require('passport-local').Strategy;
 const morgan = require('morgan');
 const passport = require('passport');
 const path = require('path');
-const pg = require('knex')({
-    client: 'pg',
-    connection: process.env.DATABASE_URL
-});
 const port = process.env.PORT || 8000;
 const session = require('express-session');
+const User = require('./models/user_model');
 const uuid = require('uuid/v4');
+const {NODE_ENV} = process.env;
 
 passport.use(new LocalStrategy(
     { usernameField: 'email' },
     async (email, password, done) => {
-        const [user] = await pg('users').where({email});
+        const user = await User.getUserByKey('email', email);
         if (!user) {
             return done(null, false, { message: 'Invalid credentials' });
         }
@@ -33,7 +31,7 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(async (id, done) => {
-    const [user] = await pg('users').where({id});
+    const user = await User.getUserByKey('id', id);
     done(null, user);
 });
 
@@ -43,7 +41,6 @@ app.set('json spaces', 2);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('resources'));
-app.use(morgan());
 
 const FileStore = require('session-file-store')(session);
 app.use(session({
@@ -70,6 +67,16 @@ app.use('/api/v1',
         require('./routes/item_routes')
     ]
 );
+
+if (NODE_ENV !== 'test') {
+    app.use(morgan('combined'));
+}
+app.use(function(err, req, res, next) {
+    if (NODE_ENV !== 'test') {
+        console.error(err.stack);
+    }
+    res.status(500).send('Internal Server Error');
+});
 
 app.get('/', (req, res) => {
     res.send('Home page!');
@@ -103,10 +110,14 @@ app.get('/login', (req, res) => {
 app.post('/login',
     passport.authenticate('local'),
     (req, res) => {
-        return res.send(`<h4>Welcome! ${req.user.name}</h4> <a href="/api">API list</a>`);
+        return res.status(200).send(`<h4>Welcome! ${req.user.name}</h4> <a href="/api">API list</a>`);
     }
 );
 
 app.listen(port, () => {
     console.log(`Listening on port ${port}...`);
 });
+
+module.exports = {
+    app
+};

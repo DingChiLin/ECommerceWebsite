@@ -1,11 +1,21 @@
 const moment = require('moment');
 const pg = require('./database');
 
-const getUserOrders = async (user_id) => {
+const getUserByKey = async (key, value) => {
+    const [user] = await pg('users')
+        .where({[key]: value})
+        .catch(e => {
+            console.log(e);
+            return [];
+        });
+    return user;
+};
+
+const getUserOrders = async (userId) => {
     const orders = await pg('orders')
         .select()
         .where({
-            user_id: user_id
+            user_id: userId
         })
         .orderBy('id')
         .catch(e => {
@@ -13,14 +23,14 @@ const getUserOrders = async (user_id) => {
             return [];
         });
 
-    const orders_with_items_link = orders.map(order => {
+    const ordersWithItemsLink = orders.map(order => {
         order['link'] = [
             { 'rel':'items', 'method':'get', 'href':`/api/v1/orders/${order.id}/items` }
         ];
         return order;
     });
 
-    return orders_with_items_link;
+    return ordersWithItemsLink;
 };
 
 const createUserOrder = async (order, items) => {
@@ -29,38 +39,39 @@ const createUserOrder = async (order, items) => {
     order.updated_at = now;
 
     return await pg.transaction(async (trx) => {
-        const [new_order] = await trx('orders')
+        const [newOrder] = await trx('orders')
             .insert(order)
             .returning('*');
 
         if (items) {
-            const order_items = items.map(obj => {
-                obj.order_id = new_order.id;
+            const orderItems = items.map(obj => {
+                obj.order_id = newOrder.id;
                 obj.created_at = now;
                 obj.updated_at = now;
                 return obj;
             });
 
             await trx('order_items')
-                .insert(order_items);
+                .insert(orderItems);
         }
-        new_order['link'] = [
-            { 'rel':'items', 'method':'get', 'href':`/api/v1/orders/${new_order.id}/items` }
+        newOrder['link'] = [
+            { 'rel':'items', 'method':'get', 'href':`/api/v1/orders/${newOrder.id}/items` }
         ];
 
-        return new_order;
+        return newOrder;
     });
 };
 
-const deleteUserOrders = async (user_id) => {
+const deleteUserOrders = async (userId) => {
     await pg('orders')
-        .where({user_id})
+        .where({user_id: userId})
         .delete();
 
     return;
 };
 
 module.exports = {
+    getUserByKey,
     getUserOrders,
     createUserOrder,
     deleteUserOrders

@@ -1,11 +1,12 @@
 const pg = require('./database');
 
-const getProduct = async (product_id) => {
-    return pg('products')
+const getProduct = async (productId) => {
+    const [product] = await pg('products')
         .select(['id', 'name', 'price', 'description', 'image_url'])
         .where({
-            id: product_id
+            id: productId
         });
+    return product;
 };
 
 const getProducts = async (ids) => {

@@ -7,10 +7,11 @@
     "test": "test"
   },
   "scripts": {
-    "create_fake_data": "node test/create_fake_data.js",
+    "create_fake_data": "node test/fake_data_generator.js",
     "init-assets": "apidoc -i server/ -o server/docs/",
     "init-server": "nodemon --ignore sessions/ server/index.js",
-    "start": "npm run init-assets && npm run init-server"
+    "start": "npm run init-assets && npm run init-server",
+    "test": "NODE_ENV=test mocha --exit"
   },
   "repository": {
     "type": "git",
@@ -40,7 +41,10 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
     "eslint": "^6.6.0",
-    "eslint-config-google": "^0.14.0"
+    "eslint-config-google": "^0.14.0",
+    "mocha": "^6.2.2"
   }
 }
