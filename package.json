@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/DingChiLin/ECommerceWebsite#readme",
   "dependencies": {
+    "apidoc": "^0.18.0",
     "bcrypt-nodejs": "0.0.3",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
